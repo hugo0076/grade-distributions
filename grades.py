@@ -2,7 +2,14 @@ import dash
 from dash import dcc, html, dash_table, Input, Output, State
 import pandas as pd
 
+<<<<<<< HEAD
 app = dash.Dash(__name__)
+=======
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
+
+app = Dash(__name__)
+server = app.server
+>>>>>>> 87f5497f4b6b857161d5e4cf87cbf9cd5e573c10
 
 app.layout = html.Div([
     dcc.Input(id='input-field', type='text', placeholder='Enter text here...'),
@@ -40,4 +47,8 @@ def update_table(n_clicks):
         return [], []
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run_server(debug=True)
+=======
+    app.run(debug=True)
+>>>>>>> 87f5497f4b6b857161d5e4cf87cbf9cd5e573c10
