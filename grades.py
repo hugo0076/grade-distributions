@@ -3,7 +3,7 @@ from dash import dcc, html, dash_table, Input, Output, State
 import pandas as pd
 
 
-app = Dash(__name__)
+app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
