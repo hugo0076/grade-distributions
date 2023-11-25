@@ -3,6 +3,8 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table, Input, Output, State, Dash
 import plotly.graph_objs as go
+import plotly.figure_factory as ff
+import plotly.express as px
 import pandas as pd
 import base64
 import fitz  # PyMuPDF
@@ -71,7 +73,7 @@ app.layout = dbc.Container(
                         html.Div(
                             [dcc.Graph(id="main-graph", figure=go.Figure())],
                             style={
-                                "width": "500px",
+                                "width": "60%",
                                 "margin": "auto",
                                 "align": "center",
                             },
@@ -93,31 +95,71 @@ app.layout = dbc.Container(
             id="modal",
         ),
         html.Div(id="n_records_store", style={"display": "none"}),
+        html.Div(id='refresh', style={'display': 'none'}),
         dcc.Store(id='unique_dict_store'),
+        dcc.Store(id='subject_data_store'),
     ],
     fluid=True,
 )
 
+# Load the data from the CSV file on initial page load/subsequent refreshes
+@app.callback(
+    Output('subject_data_store', 'data'),
+    Output("subject-year-dropdown", "options"),
+    Output("unique_dict_store", "data"),
+    Input('refresh', 'children'),
+)
+def update_data(dummy):
+    print('update_data')
+    data, unique_subject_years = read_subject_data()
+    return data.to_dict("records"), list(unique_subject_years.keys()), unique_subject_years
+
+
 @app.callback(
     Output('main-graph', 'figure'),
-    Input('subject-year-dropdown', 'value')
+    Input('subject-year-dropdown', 'value'),
+    State('unique_dict_store', 'data'),
+    State('subject_data_store', 'data'),
+    prevent_initial_call=True
 )
-def update_graph(selected_subject_year):
+def update_graph(selected_subject_year, subject_year_dict, scores):
     if selected_subject_year is not None:
-        scores = get_scores(selected_subject_year)
-        fig = go.Figure()
-        fig.add_trace(go.Histogram(x=scores, nbinsx=20, histnorm='probability density'))
-        fig.update_layout(title_text='KDE Estimate of Scores', xaxis_title='Score', yaxis_title='Density')
+        year, subject_code, subject_name = subject_year_dict[selected_subject_year]
+        df = pd.DataFrame(scores)
+        # get the scores for the selected subject-year
+        scores = df.loc[(df["subject_code"] == subject_code) & (df["year"] == year)]
+        # create the distribution plot
+        fig = px.histogram(
+            scores,
+            x="score",
+            marginal="violin",
+            hover_data=["score"],
+            color_discrete_sequence=["indianred"],
+            opacity=0.75,
+            range_x=[30, 100],
+            nbins=70,
+
+        )
+        # set title and axis labels
+        fig.update_layout(
+            title_text=f"{subject_code} - {subject_name} ({year})",
+            xaxis_title_text="Score",
+            yaxis_title_text="Probability Density",
+            bargap=0.2,
+            bargroupgap=0.1,
+        )
+
+
         return fig
     else:
         return dash.no_update
 
 @app.callback(
     Output("n_records_store", "children"),
-    Output("unique_dict_store", "data"),
-    Output("subject-year-dropdown", "options"),
+    Output('refresh', 'children'),
     Input("upload-data", "contents"),
     State("upload-data", "filename"),
+    prevent_initial_call=True,
 )
 def read_file(contents, filename):
     """
@@ -141,11 +183,9 @@ def read_file(contents, filename):
         print(num_records)
         # store the subject data
         store_subject_data(records)
-        data, unique_subject_years = read_subject_data()
-        return num_records, unique_subject_years, list(unique_subject_years.keys())
+        return num_records, 'refresh'
     else:
-        return 0, dict(), dash.no_update
-
+        return 0, dash.no_update
 @app.callback(
     Output("modal", "is_open"),
     Output("modal-body", "children"),
