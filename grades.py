@@ -1,4 +1,5 @@
 import io
+import csv
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, dash_table, Input, Output, State, Dash
@@ -9,6 +10,7 @@ import pandas as pd
 import base64
 import fitz  # PyMuPDF
 from util import extract_subject_data, store_subject_data, read_subject_data
+import hashlib
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
@@ -171,6 +173,20 @@ def read_file(contents, filename):
         if "pdf" not in content_type:
             print("File not PDF")
             return dash.no_update, dash.no_update
+
+        # check if the file has already been uploaded
+        file_hash = hashlib.sha256(content_string.encode()).hexdigest()
+        file_hashes = pd.read_csv("file_hashes.csv", header=None)[0].tolist()
+        if file_hash in file_hashes:
+            print("File already uploaded")
+            return dash.no_update, dash.no_update
+        else:
+            # store the file hash
+            with open("file_hashes.csv", "a") as f:
+                writer = csv.writer(f)
+                writer.writerow([file_hash])
+
+        # decode the file contents
         decoded = base64.b64decode(content_string)
         pdf_file = io.BytesIO(decoded)
         doc = fitz.open("pdf", pdf_file.read())

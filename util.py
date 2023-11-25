@@ -2,17 +2,27 @@ import fitz  # PyMuPDF
 import re
 import csv
 import pandas as pd
+import hashlib
 
 # Regex pattern to match year and following text
 YEAR_PATTERN = r"(\b\d{4}\b.*?)(?=\b\d{4}\b|$)"
-SCORE_PATTERN = r"\b([A-Z]+\d+)\s+[A-Z0-9]+\^?\s+([^\n]+)\n(\d{2,3})"
-
+SCORE_PATTERN_SR = r"\b([A-Z]+\d+)\s+[A-Z0-9]+\^?\s+([^\n]+)\n(\d{2,3})" # for Statement of Results
+SCORE_PATTERN_AT = r"\b([A-Z]{4}\d{5})\s([^\n]+)\n[\d\.]+\n(\d{2,3})" # for Academic Transcript
+AT = "ACADEMIC TRANSCRIPT"
+SR = "STATEMENT OF RESULTS"
 
 def extract_subject_data(extracted_text):
     """
     Extracts subject data from the extracted text. Returns a list of tuples of the form:
     (subject_code, subject_name, grade, score, year)
     """
+    if SR in extracted_text:
+        SCORE_PATTERN = SCORE_PATTERN_SR
+    elif AT in extracted_text:
+        SCORE_PATTERN = SCORE_PATTERN_AT
+    else:
+        raise ValueError("Could not find Statement of Results or Academic Transcript.")
+
     matches = re.findall(YEAR_PATTERN, extracted_text, re.DOTALL)
     all_matches = []
     for match in matches:
@@ -21,7 +31,16 @@ def extract_subject_data(extracted_text):
         score_matches = score_pattern.findall(match)
         score_matches = [(*match, int(year)) for match in score_matches]
         all_matches.extend(score_matches)
-    return all_matches
+
+    # Find the student number to make sure that we dont have any duplicates
+    student_number = re.findall(r"[\d]{6,7}", extracted_text)
+    if student_number:
+        student_number = student_number[0]
+    else:
+        student_number = None
+    # hash the student number
+    student_number = hashlib.sha256(student_number.encode()).hexdigest()
+    return all_matches#, student_number
 
 
 def store_subject_data(subject_data):
@@ -74,6 +93,7 @@ def read_subject_data(fn="all_scores.csv"):
 if __name__ == "__main__":
     # Open the uploaded PDF file
     file_path = "./StatementofResults-1081696-24_Nov_2023.pdf"
+    #file_path = './1642501988720.pdf'
     doc = fitz.open(file_path)
     # Extract text from each page
     extracted_text = "".join([page.get_text() for page in doc])
