@@ -4,6 +4,8 @@ import csv
 import pandas as pd
 import hashlib
 
+SCORES_FP = "./all_scores.csv"
+
 # Regex pattern to match year and following text
 YEAR_PATTERN = r"(\b\d{4}\b.*?)(?=\b\d{4}\b|$)"
 SCORE_PATTERN_SR = r"\b([A-Z]+\d+)\s+[A-Z0-9]+\^?\s+([^\n]+)\n(\d{2,3})" # for Statement of Results
@@ -57,7 +59,7 @@ def store_subject_data(subject_data):
     return True
 
 
-def read_subject_data(fn="all_scores.csv"):
+def read_subject_data(fn=SCORES_FP):
     """
     Reads the subject data from the CSV file. Returns a dataframe.
     """
