@@ -127,7 +127,6 @@ def read_file(contents, filename):
     else:
         return 0, dash.no_update
 
-
 @app.callback(
     Output("modal", "is_open"),
     Output("modal-body", "children"),
