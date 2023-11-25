@@ -55,7 +55,6 @@ def read_subject_data(fn="all_scores.csv"):
         .size()
         .reset_index(name="count")
     )
-    print(df_duplicates)
     # get a list of strings of the form '(year) subject_code - subject_name (count)'
     subject_year_dict = df_duplicates.apply(
         lambda row: {

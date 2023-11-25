@@ -92,14 +92,29 @@ app.layout = dbc.Container(
             ],
             id="modal",
         ),
-        html.Div(id="hidden-div", style={"display": "none"}),
+        html.Div(id="n_records_store", style={"display": "none"}),
+        dcc.Store(id='unique_dict_store'),
     ],
     fluid=True,
 )
 
+@app.callback(
+    Output('main-graph', 'figure'),
+    Input('subject-year-dropdown', 'value')
+)
+def update_graph(selected_subject_year):
+    if selected_subject_year is not None:
+        scores = get_scores(selected_subject_year)
+        fig = go.Figure()
+        fig.add_trace(go.Histogram(x=scores, nbinsx=20, histnorm='probability density'))
+        fig.update_layout(title_text='KDE Estimate of Scores', xaxis_title='Score', yaxis_title='Density')
+        return fig
+    else:
+        return dash.no_update
 
 @app.callback(
-    Output("hidden-div", "children"),
+    Output("n_records_store", "children"),
+    Output("unique_dict_store", "data"),
     Output("subject-year-dropdown", "options"),
     Input("upload-data", "contents"),
     State("upload-data", "filename"),
@@ -109,6 +124,7 @@ def read_file(contents, filename):
     Reads the uploaded file and extracts the subject data. Stores the subject data in a CSV file.
     """
     if contents is not None:
+        # read the file
         content_type, content_string = contents.split(",")
         if "pdf" not in content_type:
             print("File not PDF")
@@ -118,21 +134,24 @@ def read_file(contents, filename):
         doc = fitz.open("pdf", pdf_file.read())
         extracted_text = "".join([page.get_text() for page in doc])
         doc.close()
+
+        # extract the subject data from the file
         records = extract_subject_data(extracted_text)
         num_records = len(records)
         print(num_records)
-        print(store_subject_data(records))
+        # store the subject data
+        store_subject_data(records)
         data, unique_subject_years = read_subject_data()
-        return num_records, list(unique_subject_years.keys())
+        return num_records, unique_subject_years, list(unique_subject_years.keys())
     else:
-        return 0, dash.no_update
+        return 0, dict(), dash.no_update
 
 @app.callback(
     Output("modal", "is_open"),
     Output("modal-body", "children"),
     Input("upload-data", "contents"),
     Input("close", "n_clicks"),
-    Input("hidden-div", "children"),
+    Input("n_records_store", "children"),
     State("upload-data", "filename"),
     prevent_initial_call=True,
 )
