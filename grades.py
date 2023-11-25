@@ -14,6 +14,8 @@ import hashlib
 
 NOT_PDF = -1
 FILE_DUPE = -2
+HASH_FP = "./file_hashes.csv"
+
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
@@ -180,13 +182,13 @@ def read_file(contents, filename):
 
         # check if the file has already been uploaded
         file_hash = hashlib.sha256(content_string.encode()).hexdigest()
-        file_hashes = pd.read_csv("file_hashes.csv", header=None)[0].tolist()
+        file_hashes = pd.read_csv(HASH_FP, header=None)[0].tolist()
         if file_hash in file_hashes:
             print("File already uploaded")
             return FILE_DUPE, dash.no_update
         else:
             # store the file hash
-            with open("file_hashes.csv", "a") as f:
+            with open(HASH_FP, "a") as f:
                 writer = csv.writer(f)
                 writer.writerow([file_hash])
 
