@@ -3,8 +3,11 @@ import re
 import csv
 import pandas as pd
 import hashlib
+from pathlib import Path
 
-SCORES_FP = "./all_scores.csv"
+THIS_FOLDER = str(Path(__file__).parent.resolve())
+
+SCORES_FP = THIS_FOLDER + "/all_scores.csv"
 
 # Regex pattern to match year and following text
 YEAR_PATTERN = r"(\b\d{4}\b.*?)(?=\b\d{4}\b|$)"
@@ -93,6 +96,7 @@ def read_subject_data(fn=SCORES_FP):
 
 
 if __name__ == "__main__":
+    print(THIS_FOLDER + "/" + SCORES_FP)
     # Open the uploaded PDF file
     file_path = "./StatementofResults-1081696-24_Nov_2023.pdf"
     #file_path = './1642501988720.pdf'

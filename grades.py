@@ -11,10 +11,14 @@ import base64
 import fitz  # PyMuPDF
 from util import extract_subject_data, store_subject_data, read_subject_data
 import hashlib
+from pathlib import Path
 
 NOT_PDF = -1
 FILE_DUPE = -2
-HASH_FP = "./file_hashes.csv"
+
+THIS_FOLDER = str(Path(__file__).parent.resolve())
+
+HASH_FP = THIS_FOLDER + "/file_hashes.csv"
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
