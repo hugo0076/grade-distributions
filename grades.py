@@ -12,6 +12,9 @@ import fitz  # PyMuPDF
 from util import extract_subject_data, store_subject_data, read_subject_data
 import hashlib
 
+NOT_PDF = -1
+FILE_DUPE = -2
+
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
@@ -91,10 +94,17 @@ app.layout = dbc.Container(
         dbc.Modal(
             [
                 dbc.ModalHeader("File Upload"),
-                dbc.ModalBody(id="modal-body"),
+                dbc.ModalBody(id="modal_body"),
                 dbc.ModalFooter(dbc.Button("Close", id="close", className="ml-auto")),
             ],
             id="modal",
+        ),
+        dbc.Modal(
+            [
+                dbc.ModalHeader("File Upload Error"), 
+                dbc.ModalBody(id="error_modal_body"),
+            ],
+            id="error_modal",
         ),
         html.Div(id="n_records_store", style={"display": "none"}),
         html.Div(id='refresh', style={'display': 'none'}),
@@ -140,18 +150,13 @@ def update_graph(selected_subject_year, subject_year_dict, scores):
             opacity=0.75,
             range_x=[30, 100],
             nbins=70,
-
+            bin_size=1,
         )
         # set title and axis labels
         fig.update_layout(
             title_text=f"{subject_code} - {subject_name} ({year})",
             xaxis_title_text="Score",
-            yaxis_title_text="Probability Density",
-            bargap=0.2,
-            bargroupgap=0.1,
         )
-
-
         return fig
     else:
         return dash.no_update
@@ -172,14 +177,14 @@ def read_file(contents, filename):
         content_type, content_string = contents.split(",")
         if "pdf" not in content_type:
             print("File not PDF")
-            return dash.no_update, dash.no_update
+            return NOT_PDF, dash.no_update
 
         # check if the file has already been uploaded
         file_hash = hashlib.sha256(content_string.encode()).hexdigest()
         file_hashes = pd.read_csv("file_hashes.csv", header=None)[0].tolist()
         if file_hash in file_hashes:
             print("File already uploaded")
-            return dash.no_update, dash.no_update
+            return FILE_DUPE, dash.no_update
         else:
             # store the file hash
             with open("file_hashes.csv", "a") as f:
@@ -202,9 +207,25 @@ def read_file(contents, filename):
         return num_records, 'refresh'
     else:
         return 0, dash.no_update
+
+
+@app.callback(
+    Output("error_modal", "is_open"),
+    Output("error_modal_body", "children"),
+    Input("n_records_store", "children"),
+)
+def toggle_error_modal(num_records):
+    print(dash.callback_context.triggered)
+    if num_records == NOT_PDF:
+        return True, "File must be a PDF."
+    elif num_records == FILE_DUPE:
+        return True, "File has already been uploaded."
+    else:
+        return False, ""
+
 @app.callback(
     Output("modal", "is_open"),
-    Output("modal-body", "children"),
+    Output("modal_body", "children"),
     Input("upload-data", "contents"),
     Input("close", "n_clicks"),
     Input("n_records_store", "children"),
@@ -217,7 +238,7 @@ def toggle_modal(contents, n_clicks, num_records, filename):
         return False, ""
     else:
         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-        if button_id == "upload-data" and contents is not None:
+        if button_id == "upload-data" and contents is not None and num_records > 0:
             message = f"File {filename} uploaded successfully. {num_records} records were extracted."
             return True, message
         else:
