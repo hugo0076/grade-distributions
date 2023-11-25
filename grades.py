@@ -150,7 +150,6 @@ def update_graph(selected_subject_year, subject_year_dict, scores):
             opacity=0.75,
             range_x=[30, 100],
             nbins=70,
-            bin_size=1,
         )
         # set title and axis labels
         fig.update_layout(
