@@ -53,7 +53,8 @@ app.layout = dbc.Container(
                                         ),
                                         html.P("2. The grade data is extracted and stored anonymously, and the file hash is retained to ensure that data is not duplicated."),
                                         html.P("3. The data is used to create a grade distributions for each subject."),
-                                        html.P("Note: There is likely a large selection bias in the data - Distributions should be taken with a grain of salt.")
+                                        html.P("Note 1: There is likely a large selection bias in the data - Distributions should be taken with a grain of salt."),
+                                        html.P("Note 2: Due to the way the data is provided in transcripts, we are not able to distinguish between semesters. As a result, the distributions are for the entire year."),
                                     ],
                                 ),
                             ],
@@ -81,7 +82,7 @@ app.layout = dbc.Container(
                                             id="upload-data",
                                             children=html.Div(
                                                 [
-                                                    "Upload Transcript or Statement of Results",
+                                                    "Upload Transcript or Statement of Results\n", "(no identifying info stored)",
                                                 ]
                                             ),
                                             style={
