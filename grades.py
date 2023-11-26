@@ -32,22 +32,28 @@ app.layout = dbc.Container(
                     [
                         html.Div(
                             [
-                                dcc.Upload(
-                                    id="upload-data",
-                                    children=html.Div(
-                                        ["Upload Transcript", html.A(" (Select Files)")]
-                                    ),
-                                    style={
-                                        "width": "100%",
-                                        "height": "60px",
-                                        "lineHeight": "60px",
-                                        "borderWidth": "1px",
-                                        "borderStyle": "dashed",
-                                        "borderRadius": "5px",
-                                        "textAlign": "center",
-                                        "margin": "10px",
-                                    },
-                                    multiple=False,
+                                dcc.Loading(
+                                    id="loading",
+                                    type="circle",
+                                    children=[
+                                        dcc.Upload(
+                                            id="upload-data",
+                                            children=html.Div(
+                                                ["Upload Transcript", html.A(" (Select Files)")]
+                                            ),
+                                            style={
+                                                "width": "100%",
+                                                "height": "60px",
+                                                "lineHeight": "60px",
+                                                "borderWidth": "1px",
+                                                "borderStyle": "dashed",
+                                                "borderRadius": "5px",
+                                                "textAlign": "center",
+                                                "margin": "10px",
+                                            },
+                                            multiple=False,
+                                        )
+                                    ],
                                 )
                             ],
                             style={"width": "75%", "margin": "auto", "align": "center"},
@@ -101,7 +107,6 @@ app.layout = dbc.Container(
             [
                 dbc.ModalHeader("File Upload"),
                 dbc.ModalBody(id="modal_body"),
-                dbc.ModalFooter(dbc.Button("Close", id="close", className="ml-auto")),
             ],
             id="modal",
         ),
@@ -232,12 +237,11 @@ def toggle_error_modal(num_records):
     Output("modal", "is_open"),
     Output("modal_body", "children"),
     Input("upload-data", "contents"),
-    Input("close", "n_clicks"),
     Input("n_records_store", "children"),
     State("upload-data", "filename"),
     prevent_initial_call=True,
 )
-def toggle_modal(contents, n_clicks, num_records, filename):
+def toggle_modal(contents, num_records, filename):
     ctx = dash.callback_context
     if not ctx.triggered:
         return False, ""
