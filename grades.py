@@ -15,13 +15,11 @@ from pathlib import Path
 
 NOT_PDF = -1
 FILE_DUPE = -2
-
 THIS_FOLDER = str(Path(__file__).parent.resolve())
-
 HASH_FP = THIS_FOLDER + "/file_hashes.csv"
 
-
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app.title = "📈 UniMelb Grade Distributions"
 server = app.server
 
 app.layout = dbc.Container(
@@ -31,7 +29,7 @@ app.layout = dbc.Container(
                 dbc.Col(
                     [
                         html.H1(
-                            "UniMelb Grade Distributions",
+                            "📈 UniMelb Grade Distributions",
                             style={"textAlign": "center", "margin": "auto"},
                         )
                     ],
@@ -56,8 +54,7 @@ app.layout = dbc.Container(
                                             id="upload-data",
                                             children=html.Div(
                                                 [
-                                                    "Upload Transcript",
-                                                    html.A(" (Select Files)"),
+                                                    "Upload Transcript or Statement of Results",
                                                 ]
                                             ),
                                             style={
