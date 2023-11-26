@@ -11,10 +11,15 @@ SCORES_FP = THIS_FOLDER + "/all_scores.csv"
 
 # Regex pattern to match year and following text
 YEAR_PATTERN = r"(\b\d{4}\b.*?)(?=\b\d{4}\b|$)"
-SCORE_PATTERN_SR = r"\b([A-Z]+\d+)\s+[A-Z0-9]+\^?\s+([^\n]+)\n(\d{2,3})" # for Statement of Results
-SCORE_PATTERN_AT = r"\b([A-Z]{4}\d{5})\s([^\n]+)\n[\d\.]+\n(\d{2,3})" # for Academic Transcript
+SCORE_PATTERN_SR = (
+    r"\b([A-Z]+\d+)\s+[A-Z0-9]+\^?\s+([^\n]+)\n(\d{2,3})"  # for Statement of Results
+)
+SCORE_PATTERN_AT = (
+    r"\b([A-Z]{4}\d{5})\s([^\n]+)\n[\d\.]+\n(\d{2,3})"  # for Academic Transcript
+)
 AT = "ACADEMIC TRANSCRIPT"
 SR = "STATEMENT OF RESULTS"
+
 
 def extract_subject_data(extracted_text):
     print("extracting subject data")
@@ -46,7 +51,7 @@ def extract_subject_data(extracted_text):
         student_number = None
     # hash the student number
     student_number = hashlib.sha256(student_number.encode()).hexdigest()
-    return all_matches#, student_number
+    return all_matches  # , student_number
 
 
 def store_subject_data(subject_data):
@@ -101,7 +106,7 @@ if __name__ == "__main__":
     print(THIS_FOLDER + "/" + SCORES_FP)
     # Open the uploaded PDF file
     file_path = "./StatementofResults-1081696-24_Nov_2023.pdf"
-    #file_path = './1642501988720.pdf'
+    # file_path = './1642501988720.pdf'
     doc = fitz.open(file_path)
     # Extract text from each page
     extracted_text = "".join([page.get_text() for page in doc])

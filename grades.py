@@ -25,7 +25,7 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
 app.layout = dbc.Container(
-    [   
+    [
         dbc.Row(
             [
                 dbc.Col(
@@ -42,7 +42,6 @@ app.layout = dbc.Container(
             align="center",
             justify="center",
         ),
-
         dbc.Row(
             [
                 dbc.Col(
@@ -56,7 +55,10 @@ app.layout = dbc.Container(
                                         dcc.Upload(
                                             id="upload-data",
                                             children=html.Div(
-                                                ["Upload Transcript", html.A(" (Select Files)")]
+                                                [
+                                                    "Upload Transcript",
+                                                    html.A(" (Select Files)"),
+                                                ]
                                             ),
                                             style={
                                                 "width": "100%",
@@ -121,7 +123,6 @@ app.layout = dbc.Container(
             align="center",
             justify="center",
         ),
-
         dbc.Row(
             [
                 dbc.Col(
@@ -129,7 +130,10 @@ app.layout = dbc.Container(
                         html.Div(
                             [
                                 "Made with ❤️ by ",
-                                html.A("hugo", href="https://www.linkedin.com/in/hugo-lyons-keenan-40708bbb/"),
+                                html.A(
+                                    "hugo",
+                                    href="https://www.linkedin.com/in/hugo-lyons-keenan-40708bbb/",
+                                ),
                             ],
                             style={"textAlign": "center", "margin": "auto"},
                         )
@@ -141,7 +145,6 @@ app.layout = dbc.Container(
             align="center",
             justify="center",
         ),
-
         dbc.Modal(
             [
                 dbc.ModalHeader("File Upload"),
@@ -151,40 +154,48 @@ app.layout = dbc.Container(
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader("File Upload Error"), 
+                dbc.ModalHeader("File Upload Error"),
                 dbc.ModalBody(id="error_modal_body"),
             ],
             id="error_modal",
         ),
         dbc.Modal(
             [
-                dbc.ModalHeader("Please Contribute!"), 
+                dbc.ModalHeader("Please Contribute!"),
                 dbc.ModalBody(id="pls_modal_body"),
             ],
             id="pls_modal",
         ),
         html.Div(id="n_records_store", style={"display": "none"}),
-        html.Div(id='refresh', style={'display': 'none'}),
-        html.Div(id='n_graphs_shown', style={'display': 'none'}, children=0),
-        dcc.Store(id='unique_dict_store'),
-        dcc.Store(id='subject_data_store'),
+        html.Div(id="refresh", style={"display": "none"}),
+        html.Div(id="n_graphs_shown", style={"display": "none"}, children=0),
+        dcc.Store(id="unique_dict_store"),
+        dcc.Store(id="subject_data_store"),
     ],
     fluid=True,
 )
 
+
 # Load the data from the CSV file on initial page load/subsequent refreshes
 @app.callback(
-    Output('subject_data_store', 'data'),
+    Output("subject_data_store", "data"),
     Output("subject-year-dropdown", "options"),
     Output("subject-year-dropdown", "value"),
     Output("unique_dict_store", "data"),
-    Input('refresh', 'children'),
+    Input("refresh", "children"),
 )
 def update_data(dummy):
-    print('update_data')
+    print("update_data")
     data, unique_subject_years = read_subject_data()
-    selected_value = list(unique_subject_years.keys())[0] if unique_subject_years else None
-    return data.to_dict("records"), list(unique_subject_years.keys()), selected_value, unique_subject_years
+    selected_value = (
+        list(unique_subject_years.keys())[0] if unique_subject_years else None
+    )
+    return (
+        data.to_dict("records"),
+        list(unique_subject_years.keys()),
+        selected_value,
+        unique_subject_years,
+    )
 
 
 @app.callback(
@@ -194,20 +205,26 @@ def update_data(dummy):
 )
 def toggle_pls_modal(n_graphs_shown):
     if n_graphs_shown > 0 and n_graphs_shown % 3 == 0:
-        return True, f"Hey! You've viewed {n_graphs_shown} subjects. Please consider contributing your own data to the project. <3"
+        return (
+            True,
+            f"Hey! You've viewed {n_graphs_shown} subjects. Please consider contributing your own data to the project. We don't record your personal details, just your anonymous grades to improve our distributions <3.",
+        )
     else:
         return False, ""
 
+
 @app.callback(
-    Output('main-graph', 'figure'),
-    Output('n_graphs_shown', 'children'),
-    Input('subject-year-dropdown', 'value'),
-    State('unique_dict_store', 'data'),
-    State('subject_data_store', 'data'),
-    State('n_graphs_shown', 'children'),
-    prevent_initial_call=True
+    Output("main-graph", "figure"),
+    Output("n_graphs_shown", "children"),
+    Input("subject-year-dropdown", "value"),
+    State("unique_dict_store", "data"),
+    State("subject_data_store", "data"),
+    State("n_graphs_shown", "children"),
+    prevent_initial_call=True,
 )
-def update_graph_and_alert(selected_subject_year, subject_year_dict, scores, n_graphs_shown):
+def update_graph_and_alert(
+    selected_subject_year, subject_year_dict, scores, n_graphs_shown
+):
     if selected_subject_year is not None:
         year, subject_code, subject_name = subject_year_dict[selected_subject_year]
         df = pd.DataFrame(scores)
@@ -234,9 +251,10 @@ def update_graph_and_alert(selected_subject_year, subject_year_dict, scores, n_g
     else:
         return dash.no_update
 
+
 @app.callback(
     Output("n_records_store", "children"),
-    Output('refresh', 'children'),
+    Output("refresh", "children"),
     Input("upload-data", "contents"),
     State("upload-data", "filename"),
     prevent_initial_call=True,
@@ -277,7 +295,7 @@ def read_file(contents, filename):
         print(num_records)
         # store the subject data
         store_subject_data(records)
-        return num_records, 'refresh'
+        return num_records, "refresh"
     else:
         return 0, dash.no_update
 
@@ -295,6 +313,7 @@ def toggle_error_modal(num_records):
         return True, "File has already been uploaded."
     else:
         return False, ""
+
 
 @app.callback(
     Output("modal", "is_open"),
