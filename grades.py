@@ -25,7 +25,24 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
 app.layout = dbc.Container(
-    [
+    [   
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.H1(
+                            "UniMelb Grade Distributions",
+                            style={"textAlign": "center", "margin": "auto"},
+                        )
+                    ],
+                    width=12,
+                    className="mx-auto p-4",
+                )
+            ],
+            align="center",
+            justify="center",
+        ),
+
         dbc.Row(
             [
                 dbc.Col(
@@ -74,6 +91,7 @@ app.layout = dbc.Container(
                                 html.Div(id="dd-output-container"),
                             ],
                             style={"width": "75%", "margin": "auto", "align": "center"},
+                            id="subject-year-dropdown-div",
                         )
                     ],
                     width=6,
@@ -117,8 +135,16 @@ app.layout = dbc.Container(
             ],
             id="error_modal",
         ),
+        dbc.Modal(
+            [
+                dbc.ModalHeader("Please Contribute!"), 
+                dbc.ModalBody(id="pls_modal_body"),
+            ],
+            id="pls_modal",
+        ),
         html.Div(id="n_records_store", style={"display": "none"}),
         html.Div(id='refresh', style={'display': 'none'}),
+        html.Div(id='n_graphs_shown', style={'display': 'none'}, children=0),
         dcc.Store(id='unique_dict_store'),
         dcc.Store(id='subject_data_store'),
     ],
@@ -129,23 +155,38 @@ app.layout = dbc.Container(
 @app.callback(
     Output('subject_data_store', 'data'),
     Output("subject-year-dropdown", "options"),
+    Output("subject-year-dropdown", "value"),
     Output("unique_dict_store", "data"),
     Input('refresh', 'children'),
 )
 def update_data(dummy):
     print('update_data')
     data, unique_subject_years = read_subject_data()
-    return data.to_dict("records"), list(unique_subject_years.keys()), unique_subject_years
+    selected_value = list(unique_subject_years.keys())[0] if unique_subject_years else None
+    return data.to_dict("records"), list(unique_subject_years.keys()), selected_value, unique_subject_years
 
 
 @app.callback(
+    Output("pls_modal", "is_open"),
+    Output("pls_modal_body", "children"),
+    Input("n_graphs_shown", "children"),
+)
+def toggle_pls_modal(n_graphs_shown):
+    if n_graphs_shown > 0 and n_graphs_shown % 3 == 0:
+        return True, f"Hey! You've viewed {n_graphs_shown} subjects. Please consider contributing your own data to the project. <3"
+    else:
+        return False, ""
+
+@app.callback(
     Output('main-graph', 'figure'),
+    Output('n_graphs_shown', 'children'),
     Input('subject-year-dropdown', 'value'),
     State('unique_dict_store', 'data'),
     State('subject_data_store', 'data'),
+    State('n_graphs_shown', 'children'),
     prevent_initial_call=True
 )
-def update_graph(selected_subject_year, subject_year_dict, scores):
+def update_graph_and_alert(selected_subject_year, subject_year_dict, scores, n_graphs_shown):
     if selected_subject_year is not None:
         year, subject_code, subject_name = subject_year_dict[selected_subject_year]
         df = pd.DataFrame(scores)
@@ -167,7 +208,8 @@ def update_graph(selected_subject_year, subject_year_dict, scores):
             title_text=f"{subject_code} - {subject_name} ({year})",
             xaxis_title_text="Score",
         )
-        return fig
+        print(n_graphs_shown + 1)
+        return fig, n_graphs_shown + 1
     else:
         return dash.no_update
 
