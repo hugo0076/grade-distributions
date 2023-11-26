@@ -82,15 +82,14 @@ def read_subject_data(fn=SCORES_FP):
 
     # get unique subject-year combinations
     df_duplicates = (
-        df.groupby(["subject_code", "subject_name", "year"])
+        df.groupby(["subject_code", "subject_name"])
         .size()
         .reset_index(name="count")
     )
     # get a list of strings of the form '(year) subject_code - subject_name (count)'
     subject_year_dict = df_duplicates.apply(
         lambda row: {
-            f"({row['year']}) {row['subject_code']} - {row['subject_name']} (n={row['count']})": (
-                row["year"],
+            f"{row['subject_code']} - {row['subject_name']} (n={row['count']})": (
                 row["subject_code"],
                 row["subject_name"],
             )

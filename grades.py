@@ -58,7 +58,7 @@ app.layout = dbc.Container(
                                         html.P("2. The grade data is extracted and stored anonymously, and the file hash is retained to ensure that data is not duplicated."),
                                         html.P("3. The data is used to create a grade distributions for each subject."),
                                         html.P("Note 1: There is likely a large selection bias in the data - Distributions should be taken with a grain of salt."),
-                                        html.P("Note 2: Due to the way the data is provided in transcripts, we are not able to distinguish between semesters. As a result, the distributions are for the entire year."),
+                                        #html.P("Note 2: Due to the way the data is provided in transcripts, we are not able to distinguish between semesters. As a result, the distributions are for the entire year."),
                                     ],
                                 ),
                             ],
@@ -265,10 +265,10 @@ def update_graph_and_alert(
     selected_subject_year, subject_year_dict, scores, n_graphs_shown
 ):
     if selected_subject_year is not None:
-        year, subject_code, subject_name = subject_year_dict[selected_subject_year]
+        subject_code, subject_name = subject_year_dict[selected_subject_year]
         df = pd.DataFrame(scores)
         # get the scores for the selected subject-year
-        scores = df.loc[(df["subject_code"] == subject_code) & (df["year"] == year)]
+        scores = df.loc[(df["subject_code"] == subject_code)]
         # create the distribution plot
         fig = px.histogram(
             scores,
@@ -282,7 +282,7 @@ def update_graph_and_alert(
         )
         # set title and axis labels
         fig.update_layout(
-            title_text=f"{subject_code} - {subject_name} ({year})",
+            title_text=f"{subject_code} - {subject_name}",
             xaxis_title_text="Score",
         )
         print(n_graphs_shown + 1)
