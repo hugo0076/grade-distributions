@@ -17,6 +17,7 @@ AT = "ACADEMIC TRANSCRIPT"
 SR = "STATEMENT OF RESULTS"
 
 def extract_subject_data(extracted_text):
+    print("extracting subject data")
     """
     Extracts subject data from the extracted text. Returns a list of tuples of the form:
     (subject_code, subject_name, grade, score, year)
@@ -49,12 +50,13 @@ def extract_subject_data(extracted_text):
 
 
 def store_subject_data(subject_data):
+    print("storing subject data")
     """
     Appends the subject data to a CSV file.
     """
     if not subject_data:
         return False
-    with open("all_scores.csv", "a", newline="") as f:
+    with open(SCORES_FP, "a") as f:
         writer = csv.writer(f)
         for data in subject_data:
             writer.writerow(data)
