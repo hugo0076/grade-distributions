@@ -121,6 +121,27 @@ app.layout = dbc.Container(
             align="center",
             justify="center",
         ),
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                "Made with ❤️ by ",
+                                html.A("hugo", href="https://www.linkedin.com/in/hugo-lyons-keenan-40708bbb/"),
+                            ],
+                            style={"textAlign": "center", "margin": "auto"},
+                        )
+                    ],
+                    width=12,
+                    className="mx-auto p-4",
+                )
+            ],
+            align="center",
+            justify="center",
+        ),
+
         dbc.Modal(
             [
                 dbc.ModalHeader("File Upload"),
