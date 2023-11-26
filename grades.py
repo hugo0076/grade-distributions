@@ -18,6 +18,7 @@ FILE_DUPE = -2
 THIS_FOLDER = str(Path(__file__).parent.resolve())
 HASH_FP = THIS_FOLDER + "/file_hashes.csv"
 UNIMELB_LINK = "https://students.unimelb.edu.au/your-course/manage-your-course/exams-assessments-and-results/results-and-academic-statements/academic-transcripts-and-statements"
+GIT_LINK = "https://www.linkedin.com/in/hugo-lyons-keenan-40708bbb/"
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 app.title = "📈 UniMelb Grade Distributions"
@@ -155,7 +156,7 @@ app.layout = dbc.Container(
                                 "Made with ❤️ by ",
                                 html.A(
                                     "hugo",
-                                    href="https://www.linkedin.com/in/hugo-lyons-keenan-40708bbb/",
+                                    href=GIT_LINK,
                                 ),
                             ],
                             style={"textAlign": "center", "margin": "auto"},
