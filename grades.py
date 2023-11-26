@@ -51,7 +51,7 @@ app.layout = dbc.Container(
                                                 html.A("Statement of Results (Free) or Academic Transcript", href=UNIMELB_LINK),
                                             ]
                                         ),
-                                        html.P("2. The data is extracted and stored anonymously."),
+                                        html.P("2. The grade data is extracted and stored anonymously, and the file hash is retained to ensure that data is not duplicated."),
                                         html.P("3. The data is used to create a grade distributions for each subject."),
                                         html.P("Note: There is likely a large selection bias in the data - Distributions should be taken with a grain of salt.")
                                     ],
