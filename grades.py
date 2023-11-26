@@ -158,11 +158,6 @@ app.layout = dbc.Container(
                     [
                         html.Div(
                             [
-                                "Made with ❤️ by ",
-                                html.A(
-                                    "hugo",
-                                    href=DEV_LINK,
-                                ),
                                 "Code available at ",
                                 html.A(
                                     "this repo",
