@@ -34,6 +34,10 @@ app.layout = dbc.Container(
                             "📈 UniMelb Grade Distributions",
                             style={"textAlign": "center", "margin": "auto"},
                         ),
+                        html.H5(
+                            "Crowd-sourced grade distributions for subjects at the University of Melbourne.",
+                            style={"textAlign": "center", "margin": "auto"},
+                        ),
                         html.Div(
                             [
                                 dbc.Button("How it works?", id="open", className="mt-3", color="info"),
@@ -158,6 +162,11 @@ app.layout = dbc.Container(
                                 html.A(
                                     "hugo",
                                     href=DEV_LINK,
+                                ),
+                                "Code available at ",
+                                html.A(
+                                    "this repo",
+                                    href=DEV_LINK + "/grade-distributions",
                                 ),
                             ],
                             style={"textAlign": "center", "margin": "auto"},
