@@ -17,6 +17,7 @@ NOT_PDF = -1
 FILE_DUPE = -2
 THIS_FOLDER = str(Path(__file__).parent.resolve())
 HASH_FP = THIS_FOLDER + "/file_hashes.csv"
+UNIMELB_LINK = "https://students.unimelb.edu.au/your-course/manage-your-course/exams-assessments-and-results/results-and-academic-statements/academic-transcripts-and-statements"
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 app.title = "📈 UniMelb Grade Distributions"
@@ -31,7 +32,32 @@ app.layout = dbc.Container(
                         html.H1(
                             "📈 UniMelb Grade Distributions",
                             style={"textAlign": "center", "margin": "auto"},
-                        )
+                        ),
+                        html.Div(
+                            [
+                                dbc.Button("How it works?", id="open", className="mt-3", color="info"),
+                            ],
+                            style={"textAlign": "center", "margin": "auto"},
+                        ),
+                        dbc.Modal(
+                            [
+                                dbc.ModalHeader("How it works"),
+                                dbc.ModalBody(
+                                    [
+                                        html.P(
+                                            [
+                                                "1. Users upload their ",
+                                                html.A("Statement of Results (Free) or Academic Transcript", href=UNIMELB_LINK),
+                                            ]
+                                        ),
+                                        html.P("2. The data is extracted and stored anonymously."),
+                                        html.P("3. The data is used to create a grade distributions for each subject."),
+                                        html.P("Note: There is likely a large selection bias in the data - Distributions should be taken with a grain of salt.")
+                                    ],
+                                ),
+                            ],
+                            id="hiw_modal",
+                        ),
                     ],
                     width=12,
                     className="mx-auto p-4",
@@ -172,6 +198,16 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+# Callback to toggle the how it works modal
+@app.callback(
+    Output("hiw_modal", "is_open"),
+    Input("open", "n_clicks"),
+    [State("hiw_modal", "is_open")],
+)
+def toggle_modal(n1, is_open):
+    if n1:
+        return not is_open
+    return is_open
 
 # Load the data from the CSV file on initial page load/subsequent refreshes
 @app.callback(
